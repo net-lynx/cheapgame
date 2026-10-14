@@ -135,7 +135,8 @@ interface StoreAdapter {
 - Svelte 5 runes เท่านั้น, `onclick=`, `{#each}` แบบมี key ที่ไม่ใช่ index, `class={[...]}` แทน `class:`
 - ก่อนส่งงาน: `pnpm check` · `npx eslint <ไฟล์ที่แก้>` · `npx prettier --write <ไฟล์ที่แก้>` (ห้ามรันทั้งโฟลเดอร์) · `pnpm build`
 - ตรวจหน้าตาด้วย dev server พอร์ตของตัวเอง (ไม่แตะ 5173 ที่ผู้ใช้รันอยู่) ที่ 1280 / 390 px, light + dark — ไม่มี scroll แนวนอน
-- โปรเจกต์ยังไม่อยู่ใน git — ระวังการลบ/เขียนทับไฟล์
+- Git: repo `github.com/net-lynx/cheapgame` · branch หลัก `main` · commit / push เมื่อผู้ใช้สั่งเท่านั้น
+  ห้าม force push หรือแก้ history · `CLAUDE.md` ต้องเป็น symlink ไป `AGENTS.md` เสมอ (mode 120000)
 
 ---
 
