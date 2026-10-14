@@ -1,0 +1,533 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-sans/700.css';
+@import '@fontsource/ibm-plex-sans-condensed/600.css';
+@import '@fontsource/ibm-plex-sans-condensed/700.css';
+@import '@fontsource/ibm-plex-sans-thai/400.css';
+@import '@fontsource/ibm-plex-sans-thai/500.css';
+@import '@fontsource/ibm-plex-sans-thai/600.css';
+@import '@fontsource/ibm-plex-sans-thai/700.css';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/inter';
+
+/*
+  Dark is class-driven: mode-watcher (<ModeWatcher /> in +layout.svelte) puts `.dark` on <html>
+  from the user's Light / Dark / System choice (System follows the OS and is stored in
+  localStorage). Use `dark:` utilities / `@variant dark`, never an OS media query.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Design tokens — witty deal-hunter + controlled pop poster
+  Light/dark via the `.dark` class on <html> (inverted poster).
+  shadcn semantic vars below reference these tokens.
+
+  Three layers, each built only from the one below it:
+    1. Base  — ours, never changes: colours, IBM Plex type, poster geometry, density, halftone.
+    2. Cel   — Persona-inspired, toned down: two-tone fills, thick ink line, skew, snappy motion.
+    3. Vibe  — retro-modern TV-shopping mood (preview): sticker, catalog type, barcode, channel flip.
+  Guide page: /design-tokens
+*/
+
+@theme {
+	/* ===== 1. BASE — brand (logo / CTA / chrome — not price badges) ===== */
+	--color-brand: #e8362b;
+	--color-brand-foreground: #fffaf7;
+
+	/* --- Base: price semantics (positive cheapness only) --- */
+	--color-price-deal: #ffd400;
+	--color-price-deal-foreground: #14110f;
+	--color-price-mega: #ff1f1f;
+	--color-price-mega-foreground: #fffaf7;
+	--color-price-unknown: #faf6f1;
+	--color-price-unknown-foreground: #14110f;
+
+	/* --- Base: surfaces (paper / ink) --- */
+	--color-surface: #faf6f1;
+	--color-surface-raised: #ffffff;
+	--color-ink: #14110f;
+	--color-ink-muted: #5c534c;
+	--color-border: #14110f;
+	--color-focus: #ffd400;
+
+	/* --- Base: typography --- */
+	--font-display:
+		'IBM Plex Sans Condensed', 'IBM Plex Sans', 'IBM Plex Sans Thai', ui-sans-serif, system-ui,
+		sans-serif;
+	--font-sans: 'Inter Variable', sans-serif;
+
+	/* Base: hero zone (poster) */
+	--text-hero: 3.5rem;
+	--text-hero--line-height: 1.05;
+	--text-hero--font-weight: 700;
+	--text-price: 3rem;
+	--text-price--line-height: 1;
+	--text-price--font-weight: 700;
+	--text-display: 2rem;
+	--text-display--line-height: 1.1;
+	--text-display--font-weight: 700;
+
+	/* Base: tool zone (compact) */
+	--text-body: 1rem;
+	--text-body--line-height: 1.5;
+	--text-tool: 0.9375rem;
+	--text-tool--line-height: 1.45;
+	--text-caption: 0.8125rem;
+	--text-caption--line-height: 1.4;
+
+	/* --- Base: geometry (hard poster) --- */
+	--radius-poster: 2px;
+	--radius-poster-sharp: 0;
+	--border-width-poster: 2px;
+	--shadow-poster: 4px 4px 0 0 #14110f;
+
+	/* --- Base: density (hero vs tool) --- */
+	--spacing-hero: 1.5rem;
+	--spacing-hero-lg: 2.5rem;
+	--spacing-tool: 0.75rem;
+	--spacing-tool-lg: 1.25rem;
+
+	/* --- Base: pattern (halftone / dot, use sparingly) --- */
+	--background-image-pattern-dot: radial-gradient(
+		circle,
+		color-mix(in srgb, var(--color-ink) 22%, transparent) 0.9px,
+		transparent 1px
+	);
+
+	/*
+	  ===== 2. CEL — Persona-style layer (toned down) =====
+	  Additive only: base hex above stay the same. Two flat tones + hard stop,
+	  thick ink line, stacked offset shadows, skewed panels, snappy motion.
+	*/
+	--color-cel-line: #14110f; /* outline stays ink in both themes */
+	--color-brand-shade: #b8231b;
+	--color-price-deal-shade: #e0a500;
+	--color-price-mega-shade: #c40d0d;
+
+	--border-width-cel: 3px;
+	--shadow-cel: 3px 3px 0 0 var(--color-ink), 7px 7px 0 0 var(--color-price-deal);
+	--shadow-cel-brand: 3px 3px 0 0 var(--color-ink), 7px 7px 0 0 var(--color-brand);
+	--shadow-cel-lift: 5px 5px 0 0 var(--color-ink), 12px 12px 0 0 var(--color-brand);
+	--skew-cel: -8deg;
+
+	--ease-snap: cubic-bezier(0.2, 1.6, 0.4, 1);
+	--ease-whip: cubic-bezier(0.7, 0, 0.2, 1);
+
+	--background-image-pattern-stripe: repeating-linear-gradient(
+		-45deg,
+		var(--color-price-deal) 0 14px,
+		var(--color-cel-line) 14px 28px
+	);
+	--background-image-pattern-scan: repeating-linear-gradient(
+		0deg,
+		color-mix(in srgb, var(--color-ink) 9%, transparent) 0 1px,
+		transparent 1px 4px
+	);
+
+	/* Cel: motion — animate individual props (translate/scale) so static skew transforms survive */
+	--animate-tv-on: tv-on 0.6s var(--ease-whip) backwards;
+	--animate-cel-in: cel-in 0.55s var(--ease-snap) backwards;
+	--animate-marquee: marquee 32s linear infinite;
+	--animate-stripe-scroll: stripe-scroll 0.9s linear infinite;
+
+	@keyframes tv-on {
+		0% {
+			scale: 0 0.008;
+			filter: brightness(4);
+		}
+		35% {
+			scale: 1 0.008;
+			filter: brightness(4);
+		}
+		75% {
+			scale: 1 1.03;
+			filter: brightness(1.4);
+		}
+		100% {
+			scale: 1 1;
+			filter: none;
+		}
+	}
+
+	@keyframes cel-in {
+		0% {
+			opacity: 0;
+			translate: -3rem 0;
+			scale: 0.92;
+		}
+		100% {
+			opacity: 1;
+			translate: 0 0;
+			scale: 1;
+		}
+	}
+
+	@keyframes marquee {
+		to {
+			translate: -50% 0;
+		}
+	}
+
+	@keyframes stripe-scroll {
+		to {
+			background-position-x: 39.6px;
+		}
+	}
+
+	/*
+	  ===== 3. VIBE — retro-modern TV-shopping / video-store mood (preview) =====
+	  Mood only: every value derives from the base palette above. No new hues.
+	  Rule: max 1–2 vibe elements per component; tool zone stays on the base layer.
+	*/
+	--color-sticker-edge: var(
+		--color-brand-foreground
+	); /* die-cut paper edge — paper in both themes */
+	--radius-chunky: 6px;
+
+	--animate-sticker-slap: sticker-slap 0.5s var(--ease-snap) backwards;
+	--animate-channel-flip: channel-flip 0.45s steps(6, end);
+	/* Game disc spinning in its case (GameDiscCase). Paused/started by the component. */
+	--animate-disc-spin: disc-spin 2.4s linear infinite;
+
+	@keyframes sticker-slap {
+		0% {
+			opacity: 0;
+			scale: 1.9;
+			rotate: -18deg;
+		}
+		60% {
+			opacity: 1;
+			scale: 0.94;
+		}
+	}
+
+	@keyframes disc-spin {
+		to {
+			rotate: 360deg;
+		}
+	}
+
+	@keyframes channel-flip {
+		17% {
+			clip-path: inset(12% 0 58% 0);
+			translate: -10px 0;
+			filter: contrast(1.8) brightness(1.3);
+		}
+		34% {
+			clip-path: inset(48% 0 20% 0);
+			translate: 8px 0;
+		}
+		51% {
+			clip-path: inset(0 0 0 0);
+			translate: 0 0;
+			filter: brightness(2.2);
+			opacity: 0.6;
+		}
+		68% {
+			clip-path: inset(30% 0 40% 0);
+			translate: -4px 0;
+			opacity: 1;
+		}
+	}
+
+	/* --- shadcn ↔ design-token bridges --- */
+	--color-sidebar-ring: var(--sidebar-ring);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar: var(--sidebar);
+	--color-chart-5: var(--chart-5);
+	--color-chart-4: var(--chart-4);
+	--color-chart-3: var(--chart-3);
+	--color-chart-2: var(--chart-2);
+	--color-chart-1: var(--chart-1);
+	--color-ring: var(--ring);
+	--color-input: var(--input);
+	--color-destructive: var(--destructive);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-accent: var(--accent);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-muted: var(--muted);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-secondary: var(--secondary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-primary: var(--primary);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-popover: var(--popover);
+	--color-card-foreground: var(--card-foreground);
+	--color-card: var(--card);
+	--color-foreground: var(--foreground);
+	--color-background: var(--background);
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer theme {
+	:root {
+		@variant dark {
+			--color-price-unknown: #1c1917;
+			--color-price-unknown-foreground: #faf6f1;
+			--color-surface: #14110f;
+			--color-surface-raised: #1c1917;
+			--color-ink: #faf6f1;
+			--color-ink-muted: #a89f96;
+			--color-border: #faf6f1;
+			--color-focus: #ffd400;
+			--shadow-poster: 4px 4px 0 0 #faf6f1;
+		}
+
+		/* shadcn semantic tokens ← design tokens */
+		--background: var(--color-surface);
+		--foreground: var(--color-ink);
+		--card: var(--color-surface-raised);
+		--card-foreground: var(--color-ink);
+		--popover: var(--color-surface-raised);
+		--popover-foreground: var(--color-ink);
+		--primary: var(--color-brand);
+		--primary-foreground: var(--color-brand-foreground);
+		--secondary: var(--color-surface-raised);
+		--secondary-foreground: var(--color-ink);
+		--muted: color-mix(in srgb, var(--color-ink) 6%, var(--color-surface));
+		--muted-foreground: var(--color-ink-muted);
+		--accent: var(--color-focus);
+		--accent-foreground: var(--color-ink);
+		--destructive: var(--color-price-mega);
+		--border: var(--color-border);
+		--input: var(--color-border);
+		--ring: var(--color-focus);
+		--chart-1: var(--color-brand);
+		--chart-2: var(--color-price-deal);
+		--chart-3: var(--color-price-mega);
+		--chart-4: var(--color-ink-muted);
+		--chart-5: var(--color-ink);
+		--radius: var(--radius-poster);
+		--sidebar: var(--color-surface);
+		--sidebar-foreground: var(--color-ink);
+		--sidebar-primary: var(--color-brand);
+		--sidebar-primary-foreground: var(--color-brand-foreground);
+		--sidebar-accent: var(--color-focus);
+		--sidebar-accent-foreground: var(--color-ink);
+		--sidebar-border: var(--color-border);
+		--sidebar-ring: var(--color-focus);
+	}
+}
+
+@utility bg-pattern-dot {
+	background-color: var(--color-surface);
+	background-image: var(--background-image-pattern-dot);
+	background-size: 7px 7px;
+}
+
+@utility border-poster {
+	border-width: var(--border-width-poster);
+	border-style: solid;
+	border-color: var(--color-border);
+}
+
+@utility bg-pattern-stripe {
+	background-image: var(--background-image-pattern-stripe);
+}
+
+@utility bg-pattern-scan {
+	background-image: var(--background-image-pattern-scan);
+}
+
+@utility border-cel {
+	border-width: var(--border-width-cel);
+	border-style: solid;
+	border-color: var(--color-border);
+}
+
+/* Hard-stop two-tone fill = cel shading */
+@utility fill-cel-deal {
+	background: linear-gradient(
+		168deg,
+		var(--color-price-deal) 62%,
+		var(--color-price-deal-shade) 62%
+	);
+}
+
+@utility fill-cel-brand {
+	background: linear-gradient(168deg, var(--color-brand) 62%, var(--color-brand-shade) 62%);
+}
+
+@utility fill-cel-mega {
+	background: linear-gradient(
+		168deg,
+		var(--color-price-mega) 62%,
+		var(--color-price-mega-shade) 62%
+	);
+}
+
+/* Skew a wrapper, unskew its content — never skew inputs or Thai body text directly */
+@utility skew-cel {
+	transform: skewX(var(--skew-cel));
+}
+
+@utility unskew-cel {
+	transform: skewX(calc(var(--skew-cel) * -1));
+}
+
+/* Inked display text. Keep stroke ≤ 6px so Thai tone marks stay readable */
+@utility text-cel {
+	-webkit-text-stroke: 6px var(--color-cel-line);
+	paint-order: stroke fill;
+	text-shadow: 5px 5px 0 var(--color-cel-line);
+}
+
+/* Vibe: 24-point starburst. Clip an INNER element — clip-path also clips shadows/outlines */
+@utility sticker-burst {
+	clip-path: polygon(
+		50% 0%,
+		55.4% 9.4%,
+		62.9% 1.7%,
+		65.7% 12.1%,
+		75% 6.7%,
+		75% 17.5%,
+		85.4% 14.6%,
+		82.5% 25%,
+		93.3% 25%,
+		87.9% 34.3%,
+		98.3% 37.1%,
+		90.6% 44.6%,
+		100% 50%,
+		90.6% 55.4%,
+		98.3% 62.9%,
+		87.9% 65.7%,
+		93.3% 75%,
+		82.5% 75%,
+		85.4% 85.4%,
+		75% 82.5%,
+		75% 93.3%,
+		65.7% 87.9%,
+		62.9% 98.3%,
+		55.4% 90.6%,
+		50% 100%,
+		44.6% 90.6%,
+		37.1% 98.3%,
+		34.3% 87.9%,
+		25% 93.3%,
+		25% 82.5%,
+		14.6% 85.4%,
+		17.5% 75%,
+		6.7% 75%,
+		12.1% 65.7%,
+		1.7% 62.9%,
+		9.4% 55.4%,
+		0% 50%,
+		9.4% 44.6%,
+		1.7% 37.1%,
+		12.1% 34.3%,
+		6.7% 25%,
+		17.5% 25%,
+		14.6% 14.6%,
+		25% 17.5%,
+		25% 6.7%,
+		34.3% 12.1%,
+		37.1% 1.7%,
+		44.6% 9.4%
+	);
+}
+
+/* Vibe: die-cut sticker edge + hard ink drop. Put on the UNCLIPPED wrapper; follows any shape */
+@utility sticker-die-cut {
+	filter: drop-shadow(3px 0 0 var(--color-sticker-edge))
+		drop-shadow(-3px 0 0 var(--color-sticker-edge)) drop-shadow(0 3px 0 var(--color-sticker-edge))
+		drop-shadow(0 -3px 0 var(--color-sticker-edge)) drop-shadow(3px 4px 0 var(--color-cel-line));
+}
+
+/* Vibe: catalog micro-type (CH-07, TAPE No.…). Latin/numbers only — never letter-space Thai.
+   No colour here: pair with text-ink-muted (or another text-* token) */
+@utility text-catalog {
+	font-family: var(--font-display);
+	font-size: 0.6875rem;
+	line-height: 1.2;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Vibe: decorative barcode strip (aria-hidden only) */
+@utility bg-pattern-barcode {
+	background-image: repeating-linear-gradient(
+		90deg,
+		var(--color-ink) 0 2px,
+		transparent 2px 3px,
+		var(--color-ink) 3px 4px,
+		transparent 4px 7px,
+		var(--color-ink) 7px 10px,
+		transparent 10px 11px,
+		var(--color-ink) 11px 12px,
+		transparent 12px 15px
+	);
+}
+
+/* Vibe: optical-disc sheen — fixed conic highlights from existing tokens. Put on a NON-rotating
+   overlay so the light stays put while the disc spins beneath it */
+@utility bg-disc-sheen {
+	background-image: conic-gradient(
+		from 20deg,
+		transparent 0 6%,
+		color-mix(in srgb, var(--color-brand-foreground) 55%, transparent) 13%,
+		transparent 21% 36%,
+		color-mix(in srgb, var(--color-price-deal) 32%, transparent) 45%,
+		color-mix(in srgb, var(--color-brand) 22%, transparent) 52%,
+		transparent 60% 68%,
+		color-mix(in srgb, var(--color-brand-foreground) 45%, transparent) 76%,
+		transparent 84% 100%
+	);
+}
+
+@utility ring-poster-focus {
+	outline: 3px solid var(--color-focus);
+	outline-offset: 2px;
+}
+
+@layer base {
+	html {
+		color-scheme: light dark;
+		@apply font-sans;
+	}
+
+	body {
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		@apply bg-background text-foreground;
+	}
+
+	:focus-visible {
+		outline: 3px solid var(--color-focus);
+		outline-offset: 2px;
+	}
+
+	* {
+		@apply border-border outline-ring/50;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		::before,
+		::after {
+			animation-duration: 0.01ms !important;
+			animation-delay: 0s !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+}
